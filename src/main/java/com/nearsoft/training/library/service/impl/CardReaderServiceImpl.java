@@ -29,33 +29,26 @@ public class CardReaderServiceImpl implements CardReaderService {
     @Override
     public User readUser() {
 
-        User user = new User();
-        user.setName("IVAN URESTI");
-        user.setCurp("UEAI830711HSPRDV04");
-        user.setValidityDate("20191120");
+        try (Socket socket = new Socket(cardReaderConfigurationProperties.getHost(), cardReaderConfigurationProperties.getPort());
+                      PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                      BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-        return user;
+            out.print("AX0");
 
-//        try (Socket socket = new Socket(cardReaderConfigurationProperties.getHost(), cardReaderConfigurationProperties.getPort());
-//             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-//             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
-//
-//            out.print("AX0");
-//
-//            String response = in.readLine();
-//
-//            String[] data = response.split("|");
-//
-//            User user = new User();
-//            user.setName(data[0]);
-//            user.setCurp(data[1]);
-//            user.setValidityDate(data[2]);
-//
-//            return user;
-//
-//        } catch (IOException e) {
-//            logger.error("Can't connect to card reader device", e);
-//            throw new CardReaderFailureException(e);
-//        }
+            String response = in.readLine();
+
+            String[] data = response.split("|");
+
+            User user = new User();
+            user.setName(data[0]);
+            user.setCurp(data[1]);
+            user.setValidityDate(data[2]);
+
+            return user;
+
+        } catch (IOException e) {
+            logger.error("Can't connect to card reader device", e);
+            throw new CardReaderFailureException(e);
+        }
     }
 }
