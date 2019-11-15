@@ -54,7 +54,7 @@ public class LoanServiceImpl implements LoanService {
         userService.registerReturn(user, isbnList);
     }
 
-    private void validateLoan(User user, String[] isbnList) {
+    void validateLoan(User user, String[] isbnList) {
 
         Set<BooksByUser> borrowedBooks = userService.getBorrowedBooks(user.getCurp());
         LocalDate now = LocalDate.now();

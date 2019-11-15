@@ -40,4 +40,30 @@ public class UserServiceImplTest {
         Mockito.verifyNoMoreInteractions(userRepository, booksByUserRepository);
     }
 
+    @Test
+    public void givenAnNonExistentUserAndAListOfBooks_whenRegisterReturn_ThenBooksAreUnassignedFromUser(){
+        // Given:
+        UserRepository userRepository = Mockito.mock(UserRepository.class);
+        BooksByUserRepository booksByUserRepository = Mockito.mock(BooksByUserRepository.class);
+        UserServiceImpl userService = new UserServiceImpl(userRepository, booksByUserRepository);
+        User user = new User();
+        String[] isbnList = new String[]{"abc", "bcd"};
+        String curp = "12345";
+
+        user.setCurp(curp);
+
+        Mockito.when(userRepository.findById(curp)).thenReturn(Optional.empty());
+
+        // When:
+        userService.registerReturn(user, isbnList);
+
+        // Then:
+        Mockito.verify(userRepository).findById(curp);
+        Mockito.verify(userRepository).save(user);
+        Mockito.verify(booksByUserRepository).deleteByCurpAndIsbnIn(curp, isbnList);
+
+        Mockito.verifyNoMoreInteractions(userRepository, booksByUserRepository);
+    }
+
+
 }

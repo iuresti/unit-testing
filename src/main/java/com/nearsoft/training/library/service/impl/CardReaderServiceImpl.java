@@ -2,7 +2,9 @@ package com.nearsoft.training.library.service.impl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 
@@ -29,15 +31,24 @@ public class CardReaderServiceImpl implements CardReaderService {
     @Override
     public User readUser() {
 
-        try (Socket socket = new Socket(cardReaderConfigurationProperties.getHost(), cardReaderConfigurationProperties.getPort());
-                      PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                      BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+        try (Socket socket = new Socket(cardReaderConfigurationProperties.getHost(), cardReaderConfigurationProperties.getPort())) {
 
+            return getUser(socket.getOutputStream(), socket.getInputStream());
+
+        } catch (IOException e) {
+            logger.error("Can't connect to card reader device", e);
+            throw new CardReaderFailureException(e);
+        }
+    }
+
+    User getUser(OutputStream outputStream, InputStream inputStream) throws IOException {
+        try(PrintWriter out = new PrintWriter(outputStream, true);
+            BufferedReader in = new BufferedReader(new InputStreamReader(inputStream))) {
             out.print("AX0");
 
             String response = in.readLine();
 
-            String[] data = response.split("|");
+            String[] data = response.split("\\|");
 
             User user = new User();
             user.setName(data[0]);
@@ -45,10 +56,8 @@ public class CardReaderServiceImpl implements CardReaderService {
             user.setValidityDate(data[2]);
 
             return user;
-
-        } catch (IOException e) {
-            logger.error("Can't connect to card reader device", e);
-            throw new CardReaderFailureException(e);
         }
     }
+
+
 }
