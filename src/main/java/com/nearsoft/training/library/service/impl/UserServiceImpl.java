@@ -52,9 +52,7 @@ public class UserServiceImpl implements UserService {
             userRepository.save(user);
         }
 
-        for(String isbn : isbnList){
-            booksByUserRepository.deleteByCurpAndIsbnIn(user.getCurp(), isbnList);
-        }
+        booksByUserRepository.deleteByCurpAndIsbnIn(user.getCurp(), isbnList);
     }
 
     @Override
